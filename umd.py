@@ -41,29 +41,8 @@ class UMD:
     # the possible modifications are either expressed in a design,pddl file (as transitions) or as implemented modificaitons
     def get_possible_modifications(self, cur_node):
         
-        # check if the pddl design file has been defined - otherwise raise an error
-        if defs.NA in self.design_file_name or self.design_file_name is None:
-            print('encoded modifications not yet supported (and design file was not specified')
-            raise NotImplementedError
-
-        else:
-            # get the successorss of the pddl class representation of the problem and design(!) domain
-            pddl_successors = pddl_parser.get_pddl_successors(self.design_file_name, self.design_problem_name)
-
-
-            modifications = []
-            # the pddl operators are translated into modifications
-            for operator, successor_state in pddl_successors:
-                cur_modification = None
-                #print('processing %s %s'%(operator,successor_state))
-                #print('operator.name')
-                #print(operator.name)
-                cur_modification = utils.pddl_to_modification(operator, successor_state)
-                if cur_modification is not None and cur_node.state.is_valid(cur_modification):
-                    modifications.append(cur_modification)
-
-
-        return modifications
+        print('encoded modifications not yet supported (and design file was not specified')
+        raise NotImplementedError
     
     # returns the nodes that represent the models that result from applying the possible modifications    
     # get all possible modifications for cur_node
