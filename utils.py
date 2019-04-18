@@ -6,7 +6,6 @@ import resource
 #import dot_parser
 import itertools
 import modification
-import causal_graph
 
 # clean the gen folder
 import shutil

@@ -1,6 +1,11 @@
 __author__ = 'sarah'
 
-import  utils, defs
+import sys
+try:
+    import  utils, defs
+except ModuleNotFoundError:
+    print(sys.path)
+    raise
 import copy, os, time
 
 class Modification:
@@ -9,7 +14,7 @@ class Modification:
     def __init__(self, cost=1):
         self.cost = cost
     def apply(self, model):
-        raise NotImplementedError    
+        raise NotImplementedError
     def __str__(self):
         raise NotImplementedError
     def get_params(self):
@@ -43,7 +48,7 @@ class InformationShapingModification(Modification):
         else:
             mod_template_file_name = model.template_file_name.replace('.','_mod_%s.'%self.__str__())
         mod_template_file_name = os.path.join(defs.GEN_FOLDER, os.path.basename(mod_template_file_name))
-        
+
         print('creating a new problem with template file name %s'%mod_template_file_name)
 
         if self.predicate is not None:
@@ -57,7 +62,7 @@ class InformationShapingModification(Modification):
         mod_model = model.create_modified_model(defs.TEMPLATE_FILE, mod_template_file_name)
 
         return mod_model
-    
+
     def __str__(self):
         name = ''
         if self.predicate:
@@ -110,5 +115,3 @@ class ActionRemovalModification(Modification):
     '''
     def apply(self, model):
         raise NotImplementedError
-
-
