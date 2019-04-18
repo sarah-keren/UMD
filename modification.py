@@ -23,6 +23,7 @@ class Modification:
 
 
 
+<<<<<<< HEAD
 class InformationShapingModification(Modification):
 
     '''
@@ -115,3 +116,5 @@ class ActionRemovalModification(Modification):
     '''
     def apply(self, model):
         raise NotImplementedError
+=======
+>>>>>>> master
