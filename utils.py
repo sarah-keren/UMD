@@ -7,12 +7,69 @@ import resource
 import itertools
 import modification
 import causal_graph
-from utils_ai import FIFOQueue
-
 
 # clean the gen folder
 import shutil
 
+
+class Queue:
+
+    """Queue is an abstract class/interface. There are three types:
+        Stack(): A Last In First Out Queue.
+        FIFOQueue(): A First In First Out Queue.
+        PriorityQueue(order, f): Queue in sorted order (default min-first).
+    Each type supports the following methods and functions:
+        q.append(item)  -- add an item to the queue
+        q.extend(items) -- equivalent to: for item in items: q.append(item)
+        q.pop()         -- return the top item from the queue
+        len(q)          -- number of items in q (also q.__len())
+        item in q       -- does q contain item?
+    Note that isinstance(Stack(), Queue) is false, because we implement stacks
+    as lists.  If Python ever gets interfaces, Queue will be an interface."""
+
+    def __init__(self):
+        raise NotImplementedError
+
+    def extend(self, items):
+        for item in items:
+            self.append(item)
+
+
+def Stack():
+    """Return an empty list, suitable as a Last-In-First-Out Queue."""
+    return []
+
+
+class FIFOQueue(Queue):
+
+    """A First-In-First-Out Queue."""
+
+    def __init__(self, maxlen=None, items=[]):
+        self.queue = collections.deque(items, maxlen)
+
+    def append(self, item):
+        if not self.queue.maxlen or len(self.queue) < self.queue.maxlen:
+            self.queue.append(item)
+        else:
+            raise Exception('FIFOQueue is full')
+
+    def extend(self, items):
+        if not self.queue.maxlen or len(self.queue) + len(items) <= self.queue.maxlen:
+            self.queue.extend(items)
+        else:
+            raise Exception('FIFOQueue max length exceeded')
+
+    def pop(self):
+        if len(self.queue) > 0:
+            return self.queue.popleft()
+        else:
+            raise Exception('FIFOQueue is empty')
+
+    def __len__(self):
+        return len(self.queue)
+
+    def __contains__(self, item):
+        return item in self.queue
 
 def generate_problem_files(template_file_name, hyps_file_name, destination_folder_name = defs.GEN_FOLDER):
 
@@ -150,7 +207,7 @@ def run(cmd, running_dir= None,  timeout= defs.DEFAULT_TIME_LIMIT, memory = 2048
         # get current dir and change it if requested
         cur_running_dir = os.getcwd()
         if running_dir != None:
-    
+
             os.chdir(running_dir)
 
         # execute command
@@ -194,12 +251,12 @@ def get_state_map(policy_file_name, projection=None):
     """Given a policy file - return the state map and the projected state map (states containing only predicates with the projection string)
 
     Parameters:
-      policy_file_name - file name containing the policy 
+      policy_file_name - file name containing the policy
       projection - the string that identifies the predicates the recognition system is aware of
-   
+
     Return Value: [state_map, projected_state_map]
       state_map  - the original state map
-      projected_state_map  - the state map seen my the recognition system 
+      projected_state_map  - the state map seen my the recognition system
     """
     # get the graph from the dot file
     graph_file = open(policy_file_name, 'r')
@@ -216,15 +273,15 @@ def get_state_map(policy_file_name, projection=None):
         for key in state_map.keys():
             val = state_map[key]
             val_list = val.split('()')
-            val_list = val_list[:-1]        
+            val_list = val_list[:-1]
 
             # create a partial state with only the vars that include the projected value
             projected_val = []
             for val in val_list:
-                #print('val is %s\n'%val)                
-                if projection in val and 'NegatedAtom' not in val and 'k_not' not in val :                    
+                #print('val is %s\n'%val)
+                if projection in val and 'NegatedAtom' not in val and 'k_not' not in val :
                     projected_val.append(val)
-             
+
             # add the value to the map
             #print(projected_val)
             if len(projected_val) == 0:
@@ -250,7 +307,7 @@ def get_all_pairs(list_to_pair,b_ordered):
 
 # TODO SARAH : Do we want to support entailement here ?
 def is_equal_state(state_0_id,state_1_id, id_state_map_0, id_state_map_1, special_label):
-    
+
 
     # deal with the nil node
     if special_label in state_0_id or special_label in state_1_id:
@@ -262,11 +319,11 @@ def is_equal_state(state_0_id,state_1_id, id_state_map_0, id_state_map_1, specia
     # get the maps representing each state
     state_0 = id_state_map_0[int(state_0_id)]
     state_1 = id_state_map_1[int(state_1_id)]
- 
+
     for elem in state_0:
         if elem not in state_1:
             return False
- 
+
     return True
 
 def get_successors_nodes(node_id, graph):
@@ -276,24 +333,24 @@ def get_successors_nodes(node_id, graph):
     for edge in (graph.obj_dict['edges']):
         #node_name = (node[0])['name']
         if node_id == edge[0]:
-            
+
             next_node = edge[1]
             next_node_label = ((((graph.obj_dict['nodes'])[next_node])[0])['attributes'])['label']
             #print('nodedddd:::: %s label::: %s'%(next_node,next_node_label))
             if 'DET' in next_node_label:
                 det_nodes.append(next_node)
-            
+
             else:
                 successor_nodes.append(next_node)
-    
+
     for det_node_id in det_nodes:
         for edge in (graph.obj_dict['edges']):
             #node_name = (node[0])['name']
             if det_node_id == edge[0]:
                 next_node = edge[1]
                 successor_nodes.append(next_node)
-                
-            
+
+
     return successor_nodes
 
 
@@ -304,11 +361,11 @@ def get_successors_nodes_original(node_id, graph):
     for edge in (graph.obj_dict['edges']):
         #node_name = (node[0])['name']
         if node_id == edge[0]:
-            
+
             next_node = edge[1]
             next_node_label = ((((graph.obj_dict['nodes'])[next_node])[0])['attributes'])['label']
             print('node:::: %s label::: %s'%(next_node,next_node_label))
-            
+
             successor_nodes.append(next_node)
 
     return successor_nodes
@@ -318,7 +375,7 @@ def get_successors_nodes_original(node_id, graph):
 
 '''
 def get_successors_nodes(node_id, graph):
-    
+
     successor_nodes = []
     sensor_nodes = []
     for edge in (graph.obj_dict['edges']):
@@ -328,12 +385,12 @@ def get_successors_nodes(node_id, graph):
             # ignore sensing actions - and take the non-sensing successors of the sensing node
             next_node_label = ((((graph.obj_dict['nodes'])[next_node])[0])['attributes'])['label']
             print('node:::: %s label::: %s'%(next_node,next_node_label))
-            if 'sensor' in next_node_label:                
+            if 'sensor' in next_node_label:
                 sensor_node = next_node
                 sensor_nodes.append(sensor_node)
-            else:    
+            else:
                 successor_nodes.append(next_node)
-    
+
     #add the succsrros of the sensor nodes
     for sensor_node_id in sensor_nodes:
         for edge in (graph.obj_dict['edges']):
@@ -341,8 +398,8 @@ def get_successors_nodes(node_id, graph):
                 next_node_s = edge[1]
                 successor_nodes.append(next_node_s)
 
-              
-                
+
+
     return successor_nodes
 
 '''
@@ -420,7 +477,7 @@ class PolicyTreeNode:
         #hash_code = hash(''.join(state_a)+' - '+''.join(state_b))
 
         hash_code = hash(self.state[0]+ '-' + self.state[1])
-    
+
         return hash_code
 
 # TODO SARAH: Deal with loops
@@ -438,29 +495,29 @@ def get_maximal_common_prefix_dot_files(graph_A, graph_B,init_node_label = '_nil
 
     wcd = 0
     max_node = root_node
-    
+
     print('projected map 0')
     print(projected_map_0)
     print('projected map 1')
     print(projected_map_1)
 
-    
-     
+
+
     # we check whether the states are equal according to the projected map (!), i.e. from the point of view of the recognition system
     if not is_equal_state(init_node_label,init_node_label,projected_map_0,projected_map_1,init_node_label):
         return [max_node,wcd]
 
-    #start traversal until the most distant eqaul state is found   
+    #start traversal until the most distant eqaul state is found
     frontier = FIFOQueue()
     frontier.append(root_node)
     explored = set()
-    
+
     # we keep an iteration counter to deal with circles
     iteration_count = 0
     while frontier and iteration_count< max_horizon:
-        
+
         iteration_count = iteration_count+1
-        
+
         # extract node (that represents both graphs)
         node = frontier.pop()
         wcd = node.depth
@@ -483,10 +540,10 @@ def get_maximal_common_prefix_dot_files(graph_A, graph_B,init_node_label = '_nil
                 new_node = PolicyTreeNode(child_0, child_1, node)
                 if new_node not in explored:
                     frontier.append(new_node)
-    
+
     # we reduce the wcd by one - since the empty (nil) node at the root is not part of our tree
-    wcd = wcd-1 
-    
+    wcd = wcd-1
+
     return[max_node,wcd]
 
 
@@ -526,15 +583,15 @@ def add_predicate_to_init_state_pddl(predicate, template_file_name, mod_template
     new_file_lines = []
     knowledge_line_already_exists = False
     for line in template_file_lines:
-        
+
         if 'Added knowledge' in line:
             knowledge_line_already_exists = True
             new_file_lines.append(line + '\n' + predicate +'\n')
-                        
+
         elif defs.ADDED_PREDICATES_STRING in line and not knowledge_line_already_exists:
             new_file_lines.append(line+'\n ;;; Added knowledge\n' + predicate+ '\n')
-            
-        else:            
+
+        else:
             new_file_lines.append(line)
 
     # the newly generated problem file
@@ -704,11 +761,8 @@ def is_atom_in_list(atom_1, atom_list):
         parsed_atom_1 = parsed_atom_1.replace(' ', '')
         parsed_atom_1 = parsed_atom_1.replace('Negated', '')
         parsed_atom_1 = parsed_atom_1.replace('_', '')
-       
+
 
         if parsed_atom_1 in parsed_latom:
             return True
     return False
-
-
-
