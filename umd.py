@@ -1,7 +1,7 @@
 __author__ = 'sarah'
 
 import search
-import pddl_parser, utils, defs
+import utils, defs
 
 class UMD:
 
