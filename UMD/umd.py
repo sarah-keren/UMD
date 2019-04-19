@@ -9,11 +9,9 @@ class UMD:
        supporting COMPLETE
     """
 
-    def __init__(self, initial_model, constraints, design_file_name, design_problem_file_name ):
+    def __init__(self, initial_model, constraints ):
         self.initial_model = initial_model
         self.constraints = constraints
-        self.design_file_name = design_file_name
-        self.design_problem_name =  design_problem_file_name
 
 
 

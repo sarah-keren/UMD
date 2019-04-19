@@ -1,2 +1,6 @@
 # Don't track content of these folders
 UMD/__pycache__
+
+UMD\.egg-info/
+
+\.idea/

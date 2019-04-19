@@ -79,7 +79,7 @@ def best_first_design(umd_problem, frontier,  closed_list = [], termination_crit
             if cur_node.value is None:
                 cur_value = umd_problem.evaluate(cur_node.state)
                 cur_node.value = cur_value
-
+              
             else:
                 cur_value = cur_node.value
 
