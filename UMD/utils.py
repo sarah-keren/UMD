@@ -70,50 +70,6 @@ class FIFOQueue(Queue):
     def __contains__(self, item):
         return item in self.queue
 
-def generate_problem_files(template_file_name, hyps_file_name, destination_folder_name = defs.GEN_FOLDER):
-
-    # make sure the destination folder exists
-    if not os.path.exists(destination_folder_name):
-        os.mkdir(destination_folder_name)
-
-    if not os.path.exists(template_file_name):
-        print('Error in generate_problem_files : File %s does not exist'%template_file_name)
-        return None
-
-    if not os.path.exists(hyps_file_name):
-        print('Error in generate_problem_files : File %s does not exist'%hyps_file_name)
-        return None
-
-    template_file = open(template_file_name, "r")
-    template_file_lines = template_file.readlines()
-
-    hyps_file = open(hyps_file_name, "r")
-
-    hyps = hyps_file.readlines()
-
-
-    hyp_index = 0
-    hyp_files = []
-    for hyp in hyps:
-
-        # the newly generated problem file
-        problem_file_name = os.path.join(destination_folder_name,'problem_%d.pddl'%hyp_index)
-        problem_file = open(problem_file_name, "w")
-
-        # read all lines from the template file and copy them to the problem file, except for the <hyp> line which is replaced by hyp
-        for line in template_file_lines:
-            if defs.HYPS_STRING in line:
-                problem_file.write('%s\n'%defs.HYPS_STRING)
-                problem_file.write(hyp)
-            else:
-                problem_file.write(line)
-
-        problem_file.close()
-        print(problem_file_name)
-        hyp_files.append(problem_file_name)
-        hyp_index += 1
-
-    return [hyps,hyp_files]
 
 
 class Log:
