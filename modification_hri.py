@@ -3,16 +3,22 @@ __author__ = 'sarah'
 import  utils, defs
 import copy, os, time
 
-class Modification:
+from modification import *
+
+class Modification_hri (Modification):
 
 
     def __init__(self, cost=1):
 
         self.cost = cost
 
-    def apply(self, model):
+    def apply(self, model, modf):
 
         raise NotImplementedError # how to get modified_sensor_placement
+
+        mod_model = model.create_modified_model(modf)
+
+        return mod_model
 
     def __str__(self):
 

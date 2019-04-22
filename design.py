@@ -15,7 +15,7 @@ def best_first_design(umd_problem, frontier,  closed_list = [], termination_crit
 
        - frontier - keeps the open nodes and defines the order by which they are examined (e.g., queue) see search for options
                     if this is a heuristic search, the heuristic is used by the frontier when add is evoked
-       - closed_list - maintains the states that have been explored (if set to None, no list is maintained) 
+       - closed_list - maintains the states that have been explored (if set to None, no list is maintained)
        - termination_criteria - a termination condition for which the current best result is returned.
          For example, for GRD the search will stop once wcd =0
        - prune_func - given the successors of a node, the pruning function returns only the nodes to be further explored
@@ -25,10 +25,10 @@ def best_first_design(umd_problem, frontier,  closed_list = [], termination_crit
     # init the search node
     root_node = search.DesignNode(umd_problem.initial_model, None, None,0, umd_problem)
     # the frontier sets the order by which nodes are explored (e.g.FIFO, LIFO etc.)
-    # we are assuming the root node is valid, i.e., it doesn't violate the design constraints 
+    # we are assuming the root node is valid, i.e., it doesn't violate the design constraints
     frontier.add(root_node)
-    # check for node validity 
-        
+    # check for node validity
+
     # keeping the best value found so far
     best_value = None
     # keeping the best solution found so far
@@ -36,7 +36,7 @@ def best_first_design(umd_problem, frontier,  closed_list = [], termination_crit
     # counting number of explored nodes
     explored_count = 0
 
-    
+
     # a flag used to indicate that the termination criteria has not yet been reached
     continue_search = True
 
@@ -165,48 +165,35 @@ def log_progress(results_log, cur_node, cur_value, best_node, best_value, umd_pr
     log_file.write(log_message)
     log_file.flush()
 
-    
+
 
 class TerminationCriteria:
-    
+
     def isTerminal(self, node, value):
-        raise NotImplementedError    
+        raise NotImplementedError
     def __str__(self):
         raise NotImplementedError
-    
+
 
 class TerminationCriteriaOptimalValue(TerminationCriteria):
-    
+
     def __init__(self, optimal_value, orSmaller = True):
         self.optimal_value = optimal_value
         self.orSmaller = orSmaller
 
     def isTerminal(self, node, node_value):
-        
-        if self.orSmaller: 
+
+        if self.orSmaller:
             if node_value <= self.optimal_value :
                 return True
             else:
-                return False 
-            
+                return False
+
         else: #or bigger
             if node_value >= self.optimal_value :
                 return True
             else:
                 return False
-            
+
     def __str__(self):
         raise NotImplementedError
-
-
-
-
-
-
-
-
-
-
-
-
-
