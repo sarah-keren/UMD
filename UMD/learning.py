@@ -15,15 +15,16 @@ import os
 
 # TODO - get test set to validate model on
 
-def generate_models(design_model, design_problem, budget_limit, n_episodes, mdp, n_instances=3, testing=False):
+def generate_models(design_problem, budget_limit, n_episodes, mdp, n_instances=3, testing=False):
     out = []
     seen = set()
 
+    design_model = design_problem.initial_model
+
     # Generate n_instances problem instances, with random initial maps
     # and random design budgets
-
     if testing:
-        root_node = search.DesignNode(design_problem.initial_model, None, None,0, design_problem)
+        root_node = search.DesignNode(design_model, None, None,0, design_problem)
         possible_mods = design_problem.get_possible_modifications(root_node)
         for mod in possible_mods:
             new_model = mod.apply(design_model)
