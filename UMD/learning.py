@@ -15,29 +15,30 @@ import os
 
 # TODO - get test set to validate model on
 
-def generate_models(design_problem, budget_limit, n_episodes, mdp, n_instances=3, testing=False):
+def generate_models(umd_design_problem, budget_limit, n_episodes, mdp, n_instances=3, testing=False):
     out = []
     seen = set()
 
-    design_model = design_problem.initial_model
+    design_model = umd_design_problem.initial_model
 
     # Generate n_instances problem instances, with random initial maps
     # and random design budgets
     if testing:
-        root_node = search.DesignNode(design_model, None, None,0, design_problem)
-        possible_mods = design_problem.get_possible_modifications(root_node)
+        root_node = search.DesignNode(design_model, None, None,0, umd_design_problem)
+        possible_mods = umd_design_problem.get_possible_modifications(root_node)
         for mod in possible_mods:
             new_model = mod.apply(design_model)
             out.append(new_model)
         return out
 
-    out.append((design_model, design_problem))
+    out.append((design_model, umd_design_problem))
 
     for i in range(n_instances):
         good_model = False
 
-        root_node = search.DesignNode(design_problem.initial_model, None, None,0, design_problem)
-        possible_mods = design_problem.get_possible_modifications(root_node)
+        root_node = search.DesignNode(umd_design_problem.initial_model, None,
+                                      None,0, umd_design_problem)
+        possible_mods = umd_design_problem.get_possible_modifications(root_node)
 
         while not good_model:
             new_model = copy.deepcopy(design_model)
@@ -50,7 +51,7 @@ def generate_models(design_problem, budget_limit, n_episodes, mdp, n_instances=3
             if str(new_model.mdp) not in seen:
                 seen.add(str(new_model.mdp))
                 good_model = True
-                out.append((new_model, design_problem))
+                out.append((new_model, umd_design_problem))
     return out
 
 def create_combos(x_vector):
