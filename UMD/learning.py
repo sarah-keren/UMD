@@ -1,5 +1,3 @@
-import rl_model
-from rld import RLD
 from sklearn import linear_model
 import data_model
 import constraint
@@ -17,39 +15,33 @@ import os
 
 # TODO - get test set to validate model on
 
-def generate_models(budget_limit, n_episodes, mdp, n_instances=3, testing=False):
+def generate_models(umd_design_problem, budget_limit, n_episodes, mdp, n_instances=3, testing=False):
     out = []
     seen = set()
 
+    design_model = umd_design_problem.initial_model
+
     # Generate n_instances problem instances, with random initial maps
     # and random design budgets
-    rlm = rl_model.RL_model(mdp=mdp, discount=1, n_episodes=n_episodes, allowed_rewards='none', busy_wait=True)
-
-    rld_problem = RLD(rlm,
-                      constraints=[],
-                      mdp=mdp,
-                      design_problem_file_name=None
-    )
-
-
     if testing:
-        root_node = search.DesignNode(rld_problem.initial_model, None, None,0, rld_problem)
-        possible_mods = rld_problem.get_possible_modifications(root_node)
+        root_node = search.DesignNode(design_model, None, None,0, umd_design_problem)
+        possible_mods = umd_design_problem.get_possible_modifications(root_node)
         for mod in possible_mods:
-            new_model = mod.apply(rlm)
+            new_model = mod.apply(design_model)
             out.append(new_model)
         return out
 
-    out.append((rlm, rld_problem))
+    out.append((design_model, umd_design_problem))
 
     for i in range(n_instances):
         good_model = False
 
-        root_node = search.DesignNode(rld_problem.initial_model, None, None,0, rld_problem)
-        possible_mods = rld_problem.get_possible_modifications(root_node)
+        root_node = search.DesignNode(umd_design_problem.initial_model, None,
+                                      None,0, umd_design_problem)
+        possible_mods = umd_design_problem.get_possible_modifications(root_node)
 
         while not good_model:
-            new_model = copy.deepcopy(rlm)
+            new_model = copy.deepcopy(design_model)
             budget = random.choice(range(1, 1+budget_limit))
             mods = random.sample(possible_mods, budget)
 
@@ -59,7 +51,7 @@ def generate_models(budget_limit, n_episodes, mdp, n_instances=3, testing=False)
             if str(new_model.mdp) not in seen:
                 seen.add(str(new_model.mdp))
                 good_model = True
-                out.append((new_model, rld_problem))
+                out.append((new_model, umd_design_problem))
     return out
 
 def create_combos(x_vector):
