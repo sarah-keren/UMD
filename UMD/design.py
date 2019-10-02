@@ -2,6 +2,7 @@ __author__ = 'sarah'
 
 import search
 import defs, time
+import logging
 
 def best_first_design(umd_problem, frontier,  closed_list = [], termination_criteria = None, prune_func = None, log_file=None, results_log_file= None, iter_limit = defs.NA, time_limit = defs.NA):
 
@@ -21,6 +22,7 @@ def best_first_design(umd_problem, frontier,  closed_list = [], termination_crit
        - prune_func - given the successors of a node, the pruning function returns only the nodes to be further explored
     """
 
+    logging.info('Starting: best_first_design')
 
     # init the search node
     root_node = search.DesignNode(umd_problem.initial_model, None, None,0, umd_problem)
@@ -42,9 +44,8 @@ def best_first_design(umd_problem, frontier,  closed_list = [], termination_crit
 
     results_log = {}
     start_time = None
-    if log_file is not None:
-        start_time = time.time()
-        # holding the best values and corresponding nodes for each resource allocation
+    start_time = time.time()
+
 
     # continue while there are still nodes to explore and the termination condition has not been met
     ex_terminated = False
@@ -53,6 +54,9 @@ def best_first_design(umd_problem, frontier,  closed_list = [], termination_crit
 
         while not frontier.isEmpty() and continue_search:
             explored_count += 1
+
+            #LOG
+            log_string = 'InMethod best_first_design(while): explored_count:%d,'%explored_count
 
             if defs.NA != iter_limit and explored_count > iter_limit:
                 continue_search = False
@@ -69,6 +73,7 @@ def best_first_design(umd_problem, frontier,  closed_list = [], termination_crit
 
             # get the current node
             cur_node = frontier.extract()
+            log_string += ' cur_node:%s,'%cur_node
 
             # add the node to the closed list
             if closed_list is not None:
@@ -76,12 +81,15 @@ def best_first_design(umd_problem, frontier,  closed_list = [], termination_crit
 
             # verify the model is valid (this is done here to support non-persistent model (i.e. models where non-valid modification sequences can be a prefix of valid ones)
             # and update the best value found so far
+
+            start_time_evaluate = time.time()
             if cur_node.value is None:
                 cur_value = umd_problem.evaluate(cur_node.state)
                 cur_node.value = cur_value
               
             else:
                 cur_value = cur_node.value
+            log_string += ' ,node_eval_time:%.2f' % (time.time() - start_time_evaluate)
 
             if best_node is None or umd_problem.is_better(cur_value, best_value):
                 best_value = cur_value
@@ -89,27 +97,34 @@ def best_first_design(umd_problem, frontier,  closed_list = [], termination_crit
 
             if log_file is not None:
                 log_progress(results_log, cur_node, cur_value, best_node, best_value, umd_problem, log_file, start_time, explored_count)
+            log_string += ' ,cur_value:%.2f, best_node:%s, best_value:%.2f'%(cur_value, best_node, best_value)
 
             # check if termination criteria had been met - and stop the search if it has
             if termination_criteria is not None and termination_criteria.isTerminal(best_node, best_value):
+                logging.info(log_string)
                 break
 
             # get the succsessors of the node
             succs = umd_problem.successors(cur_node)
+            log_string += ' ,pre_prune_succ_count:%d' % (len(succs))
 
             # if pruning is applied - prune the set of successors
+            start_time_prune = time.time()
             if prune_func is not None:
                 succs = prune_func(succs,cur_node)
+            log_string += ' ,prun_func_time:%.2f,' %(time.time() - start_time_prune)
 
             # sort succesors to make sure wcd = 0 is reached at the same time for all approaches
             succs = sorted(succs, key=lambda x: x.str_modification_seq(), reverse=False)
 
+            log_string += ' ,succ_count:%d' % (len(succs))
             # evaluate each child
             if succs is None:
                 continue
 
             # add childs to the frontier
             # if the closed list was specified - add it only if it's not already there
+            start_time_succ = time.time()
             for child in succs:
                 already_in_closed_list = False
                 if closed_list is not None:
@@ -118,7 +133,8 @@ def best_first_design(umd_problem, frontier,  closed_list = [], termination_crit
                 if not already_in_closed_list and child not in frontier:
                     frontier.add(child)
                     closed_list.add(child)
-
+            succ_calc_time =  time.time() - start_time_succ
+            log_string += ' ,succ_calc_time:%.2f' % (succ_calc_time)
                 # TODO SARAH: Decide how to support modification sets
                 #elif child in frontier:
                 #    incumbent = frontier[child]
@@ -126,10 +142,13 @@ def best_first_design(umd_problem, frontier,  closed_list = [], termination_crit
                 #        del frontier[incumbent]
                 #        frontier.append(child)
 
+            logging.info(log_string)
 
+
+        calc_time = time.time() - start_time  # , "seconds"
+        logging.info('Ending: best_first_design: {best_value:%d, best_node:%s, explored_count:%d, ex_terminated:%s, calc_time:%.2f}'%(best_value,best_node, explored_count,ex_terminated, calc_time))
 
         # return the best solution found
-
         return [best_value,best_node, explored_count,ex_terminated, results_log]
 
     except Exception as e:
