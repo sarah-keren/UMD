@@ -54,9 +54,9 @@ def best_first_design(umd_problem, frontier,  closed_list = [], termination_crit
 
         while not frontier.isEmpty() and continue_search:
             explored_count += 1
-
+            logging.info('best_first_design(node) node number %d'%(explored_count))
             #LOG
-            log_string = 'InMethod best_first_design(while): explored_count:%d,'%explored_count
+            log_string = 'InMethod best_first_design(node): explored_count:%d'%explored_count
 
             if defs.NA != iter_limit and explored_count > iter_limit:
                 continue_search = False
@@ -73,7 +73,7 @@ def best_first_design(umd_problem, frontier,  closed_list = [], termination_crit
 
             # get the current node
             cur_node = frontier.extract()
-            log_string += ' cur_node:%s,'%cur_node
+            log_string += ' cur_node:%s'%cur_node
 
             # add the node to the closed list
             if closed_list is not None:
@@ -89,7 +89,7 @@ def best_first_design(umd_problem, frontier,  closed_list = [], termination_crit
               
             else:
                 cur_value = cur_node.value
-            log_string += ' ,node_eval_time:%.2f' % (time.time() - start_time_evaluate)
+            log_string += ', node_eval_time:%.3f' % (time.time() - start_time_evaluate)
 
             if best_node is None or umd_problem.is_better(cur_value, best_value):
                 best_value = cur_value
@@ -97,7 +97,7 @@ def best_first_design(umd_problem, frontier,  closed_list = [], termination_crit
 
             if log_file is not None:
                 log_progress(results_log, cur_node, cur_value, best_node, best_value, umd_problem, log_file, start_time, explored_count)
-            log_string += ' ,cur_value:%.2f, best_node:%s, best_value:%.2f'%(cur_value, best_node, best_value)
+            log_string += ', cur_value:%.3f, best_node:%s, best_value:%.3f'%(cur_value, best_node, best_value)
 
             # check if termination criteria had been met - and stop the search if it has
             if termination_criteria is not None and termination_criteria.isTerminal(best_node, best_value):
@@ -106,18 +106,18 @@ def best_first_design(umd_problem, frontier,  closed_list = [], termination_crit
 
             # get the succsessors of the node
             succs = umd_problem.successors(cur_node)
-            log_string += ' ,pre_prune_succ_count:%d' % (len(succs))
+            log_string += ', pre_prune_succ_count:%d' % (len(succs))
 
             # if pruning is applied - prune the set of successors
             start_time_prune = time.time()
             if prune_func is not None:
                 succs = prune_func(succs,cur_node)
-            log_string += ' ,prun_func_time:%.2f,' %(time.time() - start_time_prune)
+            log_string += ', prun_func_time:%.3f' %(time.time() - start_time_prune)
 
             # sort succesors to make sure wcd = 0 is reached at the same time for all approaches
             succs = sorted(succs, key=lambda x: x.str_modification_seq(), reverse=False)
 
-            log_string += ' ,succ_count:%d' % (len(succs))
+            log_string += ', succ_count:%d' % (len(succs))
             # evaluate each child
             if succs is None:
                 continue
@@ -134,7 +134,7 @@ def best_first_design(umd_problem, frontier,  closed_list = [], termination_crit
                     frontier.add(child)
                     closed_list.add(child)
             succ_calc_time =  time.time() - start_time_succ
-            log_string += ' ,succ_calc_time:%.2f' % (succ_calc_time)
+            log_string += ', succ_calc_time:%.3f' % (succ_calc_time)
                 # TODO SARAH: Decide how to support modification sets
                 #elif child in frontier:
                 #    incumbent = frontier[child]
@@ -146,7 +146,7 @@ def best_first_design(umd_problem, frontier,  closed_list = [], termination_crit
 
 
         calc_time = time.time() - start_time  # , "seconds"
-        logging.info('Ending: best_first_design: {best_value:%d, best_node:%s, explored_count:%d, ex_terminated:%s, calc_time:%.2f}'%(best_value,best_node, explored_count,ex_terminated, calc_time))
+        logging.info('Ending: best_first_design: {best_value:%d, best_node:%s, explored_count:%d, ex_terminated:%s, calc_time:%.3f}'%(best_value,best_node, explored_count,ex_terminated, calc_time))
 
         # return the best solution found
         return [best_value,best_node, explored_count,ex_terminated, results_log]
@@ -179,7 +179,7 @@ def log_progress(results_log, cur_node, cur_value, best_node, best_value, umd_pr
     else:
         results_log[cur_modification_cost] = [cur_value, cur_node, cur_time, 1]
 
-    log_message = 'cur_value::'+str(cur_value) +defs.SEPARATOR+ 'cur_node::'+cur_node.__repr__() +defs.SEPARATOR+ 'cur_time::' + '%.5f'%cur_time +defs.SEPARATOR+ 'cur_cost::'+'%.2f'%cur_modification_cost+defs.SEPARATOR+ 'best_node::'+best_node.__repr__() +defs.SEPARATOR+ 'best_value::'+str(best_value)+'\n'
+    log_message = 'cur_value::'+str(cur_value) +defs.SEPARATOR+ 'cur_node::'+cur_node.__repr__() +defs.SEPARATOR+ 'cur_time::' + '%.5f'%cur_time +defs.SEPARATOR+ 'cur_cost::'+'%.3f'%cur_modification_cost+defs.SEPARATOR+ 'best_node::'+best_node.__repr__() +defs.SEPARATOR+ 'best_value::'+str(best_value)+'\n'
     print(log_message)
     log_file.write(log_message)
     log_file.flush()
