@@ -54,7 +54,7 @@ def best_first_design(umd_problem, frontier,  closed_list = [], termination_crit
 
         while not frontier.isEmpty() and continue_search:
             explored_count += 1
-            logging.info('best_first_design(node) node number %d'%(explored_count))
+
             #LOG
             log_string = 'InMethod best_first_design(node): explored_count:%d'%explored_count
 
@@ -74,7 +74,7 @@ def best_first_design(umd_problem, frontier,  closed_list = [], termination_crit
             # get the current node
             cur_node = frontier.extract()
             log_string += ' cur_node:%s'%cur_node
-
+            logging.info('best_first_design(node) node number %d cur_node:%s' % (explored_count,cur_node))
             # add the node to the closed list
             if closed_list is not None:
                 closed_list.add(cur_node)
