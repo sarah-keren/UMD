@@ -22,6 +22,8 @@ class BudgetConstraint():
     '''
     def __init__(self, budget):
         self.budget = budget
+    def __repr__(self):
+        return "%d"%self.budget
 
 
     '''
