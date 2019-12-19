@@ -19,6 +19,9 @@ class UMD:
     def evaluate(self, model):
         raise NotImplementedError
 
+    def is_better(self, val_a, val_b):
+        raise NotImplementedError
+
 
     def is_valid(self, node):
 
@@ -87,8 +90,3 @@ class UMD:
 
         return successor_nodes
 
-    def is_better(self, val_a, val_b):
-        if val_a > val_b:
-            return True
-        else:
-            return False
